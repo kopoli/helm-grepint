@@ -210,6 +210,40 @@ Uses `helm-grep-highlight-match' from helm-grep to provide line highlight."
     (candidate-number-limit . 500)
     (filter-one-by-one . grepint-grep-filter-one-by-one)))
 
+(defun grepint--grep (in-root)
+  "Run grep either in current directory or if IN-ROOT, in a root directory..
+
+The grep function is determined by the contents of
+`grepint-grep-configs' and the order of `grepint-grep-list'.  The
+root directory is determined by the :root-directory-function
+property of an element of `grepint-grep-configs'."
+  (let ((name (grepint-select-grep))
+	(default-directory default-directory))
+    (when in-root
+      (setq default-directory
+	    (funcall (or (grepint-grep-config-property name :root-directory-function)
+			 #'grepint-grep-default-root))))
+    (helm :sources '(grepint-helm-source)
+	  :buffer (format "Grepint%s: %s" (if in-root "-root" "") name)
+	  :keymap grepint-helm-map
+	  :input (funcall grepint-pre-input-function))))
+
+;;;###autoload
+(defun grepint-grep ()
+  "Run grep in the current directory.
+
+The grep function is determined by the contents of
+`grepint-grep-configs' and the order of `grepint-grep-list'."
+  (interactive)
+  (grepint--grep nil))
+
+;;;###autoload
+(defun grepint-grep-root ()
+  "This function is the same as `grepint-grep', but it runs the grep in a root directory."
+  (interactive)
+
+  (grepint--grep t))
+
 ;;;###autoload
 (defun grepint-set-default-config ()
   "Set the default grep configuration into `grepint-grep-configs' and `grepint-grep-list'."
@@ -233,26 +267,5 @@ Uses `helm-grep-highlight-match' from helm-grep to provide line highlight."
 
   (setq grepint-grep-list '(git-grep ag)))
 
-;;;###autoload
-(defun grepint-grep (&rest plist)
-  (interactive)
-  (let ((name (grepint-select-grep)))
-    (helm :sources '(grepint-helm-source)
-	  :buffer (format "Grepint: %s" name)
-	  :keymap grepint-helm-map
-	  :input (funcall grepint-pre-input-function))))
-
-;;;###autoload
-(defun grepint-grep-root (&rest plist)
-  (interactive)
-  (let* ((name (grepint-select-grep))
-	 (rootfun (or (grepint-grep-config-property name :root-directory-function)
-		      #'grepint-grep-default-root)))
-    (let ((default-directory (funcall rootfun)))
-      (helm :sources '(grepint-helm-source)
-	    :buffer (format "Grepint-root: %s" name)
-	    :input (funcall grepint-pre-input-function)))))
-
-;; TODO DEBUG
 (provide 'grepint)
 ;;; grepint.el ends here
