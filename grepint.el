@@ -164,8 +164,7 @@ Returns a list of (file line contents) or nil if the line could not be parsed."
 	(mapcar #'(lambda (x) (match-string x line)) '(1 2 3)))))
 
 (defun grepint-grep-action-jump (candidate)
-  (message "grep-action-jump [%s]" (grepint-grep-parse-line candidate))
-
+  "Jump to line in a file described by a grep -line CANDIDATE."
   (run-hooks 'grepint-grep-jump-pre-hook)
   (let ((items (grepint-grep-parse-line candidate)))
     (find-file (nth 0 items))
@@ -173,12 +172,16 @@ Returns a list of (file line contents) or nil if the line could not be parsed."
   (run-hooks 'grepint-grep-jump-post-hook))
 
 (defun grepint-grep-process ()
+  "This is the candidates-process for `grepint-helm-source'."
   (let ((cfg (grepint-get-grep-config (grepint-select-grep))))
     (apply #'grepint-run-command
 	   :extra-arguments (replace-regexp-in-string "  *" ".*" helm-pattern)
 	   (cdr cfg))))
 
 (defun grepint-grep-filter-one-by-one (candidate)
+  "Propertize each CANDIDATE provided by `grepint-helm-source'.
+
+Uses `helm-grep-highlight-match' from helm-grep to provide line highlight."
   (let ((items (grepint-grep-parse-line candidate)))
     (if items
 	(format "%s:%s:%s"
