@@ -6,7 +6,7 @@
 ;; Maintainer: Kalle Kankare <kalle.kankare@iki.fi>
 ;; Created: 19 Sep 2015
 ;; Keywords: grep grepping
-;; Version: 0.5.1
+;; Version: 0.5.2
 ;; Package-Requires: ((helm "1.0") (emacs "24"))
 
 ;; This file is not part of GNU Emacs.
@@ -26,7 +26,35 @@
 
 ;;; Commentary:
 
-;; TODO
+;; ### Description
+
+;; This package solves the following problem for me:
+;; - A single function call interface to grep and therefore keybinding.
+;; - Selects the grep based on context: Inside a git-repository, runs
+;;   git-grep, otherwise runs ag.
+;; - Uses helm to select candidates and jumps to the given line with RET.
+
+;; The following enables the aforementioned:
+
+;;         (require 'grepint)
+;;         (grepint-set-default-config)
+;;         (global-set-key (kbd "C-c g") #'grepint-grep)
+
+;; ### Additional features
+
+;; This has a second interactive function `grepint-grep-root'. This runs the
+;; grepping inside a root directory. By default this has been defined for the
+;; git-grep where it greps from the git root directory.
+
+;; ### Customization
+
+;; Look into the function `grepint-set-default-config' to see how the default
+;; cases are configured.
+
+;; ### TODO / Wishlist
+
+;; - Ability to swoop (i.e. retain the helm session while jumping).
+;; - Better documentation.
 
 ;;; Code:
 
