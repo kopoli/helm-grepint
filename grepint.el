@@ -51,11 +51,6 @@
 ;; Look into the function `grepint-set-default-config' to see how the default
 ;; cases are configured.
 
-;; ### TODO / Wishlist
-
-;; - Ability to swoop (i.e. retain the helm session while jumping).
-;; - Better documentation.
-
 ;;; Code:
 
 (require 'helm)
@@ -81,7 +76,25 @@ These are the names in `grepint-grep-configs'."
   "Manipulate this with `grepint-add-grep-config'.")
 
 (defmacro grepint-add-grep-config (name &rest configuration)
-  "Add configuration NAME with properties from CONFIGURATION."
+  "Add configuration NAME with properties from CONFIGURATION.
+
+The configuration can have the following items:
+
+:command
+ - A command string to run.
+
+:arguments
+ - Arguments provided for the command when it is run.  This
+   and :command is provided for the `grepint-run-command' function.
+
+:enable-function
+ - A function that returns non-nil if this grep can be used.  If
+   this is nil, the grep can be used always.
+
+:root-directory-function
+ - Function that returns a string of a directory that is regarded
+   as the root directory when running `grepint-grep-root'.  If
+   this is nil, `grepint-grep-root' behaves exactly as `grepint-grep'."
   `(progn (assq-delete-all ',name  grepint-grep-configs)
 	  (push (cons ',name ',configuration) grepint-grep-configs)))
 
