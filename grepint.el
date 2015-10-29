@@ -5,8 +5,8 @@
 ;; Author: Kalle Kankare <kalle.kankare@iki.fi>
 ;; Maintainer: Kalle Kankare <kalle.kankare@iki.fi>
 ;; Created: 19 Sep 2015
-;; Keywords: grep grepping
-;; Version: 0.5.2
+;; Keywords: grep, grepping, searching, helm
+;; Version: 0.5.3
 ;; Package-Requires: ((helm "1.0") (emacs "24"))
 
 ;; This file is not part of GNU Emacs.
