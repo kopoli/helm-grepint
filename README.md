@@ -18,6 +18,12 @@ The following enables the aforementioned:
         (grepint-set-default-config)
         (global-set-key (kbd "C-c g") #'grepint-grep)
 
+### Key bindings within helm
+
+- RET selects an item and closes the helm session.
+- Right arrow selects the item, but does not close the helm session. This
+  is similar as `helm-occur`.
+
 ### Additional features
 
 This has a second interactive function `grepint-grep-root`. This runs the
@@ -27,12 +33,8 @@ git-grep where it greps from the git root directory.
 ### Customization
 
 Look into the function `grepint-set-default-config` to see how the default
-cases are configured.
-
-### TODO / Wishlist
-
-- Ability to swoop (i.e. retain the helm session while jumping).
-- Better documentation.
+cases are configured. Also look into `grepint-add-grep-config` for more
+details on what is required for a new grep to be defined.
 
 ### Function Documentation
 
@@ -40,6 +42,24 @@ cases are configured.
 #### `(grepint-add-grep-config NAME &rest CONFIGURATION)`
 
 Add configuration NAME with properties from CONFIGURATION.
+
+The configuration can have the following items:
+
+:command
+ - A command string to run.
+
+:arguments
+ - Arguments provided for the command when it is run. This
+   and :command is provided for the `grepint-run-command` function.
+
+:enable-function
+ - A function that returns non-nil if this grep can be used. If
+   this is nil, the grep can be used always.
+
+:root-directory-function
+ - Function that returns a string of a directory that is regarded
+   as the root directory when running `grepint-grep-root`. If
+   this is nil, `grepint-grep-root` behaves exactly as `grepint-grep`.
 
 #### `(grepint-get-grep-config NAME)`
 
