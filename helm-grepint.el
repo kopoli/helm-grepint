@@ -1,4 +1,4 @@
-;;; grepint.el --- Generic interface to grep -*- lexical-binding: t -*-
+;;; helm-grepint.el --- Generic helm interface to grep -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2015 Kalle Kankare
 
@@ -36,9 +36,9 @@
 
 ;; The following enables the aforementioned:
 
-;;         (require 'grepint)
-;;         (grepint-set-default-config)
-;;         (global-set-key (kbd "C-c g") #'grepint-grep)
+;;         (require 'helm-grepint)
+;;         (helm-grepint-set-default-config)
+;;         (global-set-key (kbd "C-c g") #'helm-grepint-grep)
 
 ;; ### Key bindings within helm
 
@@ -48,14 +48,14 @@
 
 ;; ### Additional features
 
-;; This has a second interactive function `grepint-grep-root'. This runs the
+;; This has a second interactive function `helm-grepint-grep-root'. This runs the
 ;; grepping inside a root directory. By default this has been defined for the
 ;; git-grep where it greps from the git root directory.
 
 ;; ### Customization
 
-;; Look into the function `grepint-set-default-config' to see how the default
-;; cases are configured. Also look into `grepint-add-grep-config' for more
+;; Look into the function `helm-grepint-set-default-config' to see how the default
+;; cases are configured. Also look into `helm-grepint-add-grep-config' for more
 ;; details on what is required for a new grep to be defined.
 
 ;;; Code:
@@ -65,24 +65,24 @@
 (require 'helm-grep)
 (require 'thingatpt)
 
-(defcustom grepint-grep-list ()
+(defcustom helm-grepint-grep-list ()
   "List of grep commands.
 
-These are the names in `grepint-grep-configs'."
-  :group 'grepint)
+These are the names in `helm-grepint-grep-configs'."
+  :group 'helm-grepint)
 
-(defcustom grepint-pre-input-function
+(defcustom helm-grepint-pre-input-function
   (lambda ()
     (if (region-active-p)
 	(buffer-substring-no-properties (region-beginning) (region-end))
       (thing-at-point 'symbol)))
   "The function that supplies the pre-input for grep."
-  :group 'grepint)
+  :group 'helm-grepint)
 
-(defvar grepint-grep-configs ()
-  "Manipulate this with `grepint-add-grep-config'.")
+(defvar helm-grepint-grep-configs ()
+  "Manipulate this with `helm-grepint-add-grep-config'.")
 
-(defmacro grepint-add-grep-config (name &rest configuration)
+(defmacro helm-grepint-add-grep-config (name &rest configuration)
   "Add configuration NAME with properties from CONFIGURATION.
 
 The configuration can have the following items:
@@ -92,7 +92,7 @@ The configuration can have the following items:
 
 :arguments
  - Arguments provided for the command when it is run.  This
-   and :command is provided for the `grepint-run-command' function.
+   and :command is provided for the `helm-grepint-run-command' function.
 
 :enable-function
  - A function that returns non-nil if this grep can be used.  If
@@ -100,28 +100,28 @@ The configuration can have the following items:
 
 :root-directory-function
  - Function that returns a string of a directory that is regarded
-   as the root directory when running `grepint-grep-root'.  If
-   this is nil, `grepint-grep-root' behaves exactly as `grepint-grep'."
-  `(progn (assq-delete-all ',name  grepint-grep-configs)
-	  (push (cons ',name ',configuration) grepint-grep-configs)))
+   as the root directory when running `helm-grepint-grep-root'.  If
+   this is nil, `helm-grepint-grep-root' behaves exactly as `helm-grepint-grep'."
+  `(progn (assq-delete-all ',name  helm-grepint-grep-configs)
+	  (push (cons ',name ',configuration) helm-grepint-grep-configs)))
 
-(defun grepint-get-grep-config (name)
+(defun helm-grepint-get-grep-config (name)
   "Get the configuration associated with NAME."
-  (assoc name grepint-grep-configs))
+  (assoc name helm-grepint-grep-configs))
 
-(defun grepint-grep-config-property (name property &rest new-value)
+(defun helm-grepint-grep-config-property (name property &rest new-value)
   "Get a config NAME's PROPERTY or set it to NEW-VALUE.
-The config NAME has been added with `grepint-add-grep-config'.
+The config NAME has been added with `helm-grepint-add-grep-config'.
 Returns the current value of the property or nil if either name
 or property was not found."
-  (let ((cmd (assoc name grepint-grep-configs)))
+  (let ((cmd (assoc name helm-grepint-grep-configs)))
     (when cmd
       (if (null new-value)
 	  (plist-get (cdr cmd) property)
 	(plist-put (cdr cmd) property (car new-value))
 	(car new-value)))))
 
-(defun grepint-run-command (&rest plist)
+(defun helm-grepint-run-command (&rest plist)
   "Run a grep command from PLIST.
 
 The command line is constructed with the following PLIST items:
@@ -132,7 +132,7 @@ The :arguments is split on whitespace, but :extra-arguments are
 used as is."
   (let ((cmd (executable-find (plist-get plist :command))) proc)
     (when cmd
-      (setq proc (apply 'start-process "grepint" nil
+      (setq proc (apply 'start-process "helm-grepint" nil
 			(append
 			 (list cmd)
 			 (split-string (plist-get plist :arguments))
@@ -143,37 +143,37 @@ used as is."
       proc)))
 
 
-(defun grepint-select-grep ()
-  "Select the grep based on :enable-function from `grepint-grep-configs'.
+(defun helm-grepint-select-grep ()
+  "Select the grep based on :enable-function from `helm-grepint-grep-configs'.
 
-The greps are compared in order of `grepint-grep-list'.  If the
+The greps are compared in order of `helm-grepint-grep-list'.  If the
 grep does not have :enable-function property, select it
 automatically."
-  (let (name enabler (greps grepint-grep-list))
+  (let (name enabler (greps helm-grepint-grep-list))
     (while greps
       (setq name (car greps))
-      (setq enabler (or (grepint-grep-config-property name :enable-function)
+      (setq enabler (or (helm-grepint-grep-config-property name :enable-function)
 			#'(lambda () t)))
       (if (and (funcall enabler)
-	       (executable-find (grepint-grep-config-property name :command)))
+	       (executable-find (helm-grepint-grep-config-property name :command)))
 	  (setq greps nil)
 	(setq name nil)
 	(pop greps)))
     (when (not name)
-      (error "Grepint: No suitable grep found"))
+      (error "Helm-Grepint: No suitable grep found"))
     name))
 
-(defun grepint-grep-default-root ()
+(defun helm-grepint-grep-default-root ()
   "Get the default root directory if :root-directory-function isn't defined."
   default-directory)
 
 ;; Helm interface
-(defvar grepint-grep-jump-pre-hook '(push-mark)
-  "Hook that is run before jumping to the target in `grepint-grep-action-jump'.")
-(defvar grepint-grep-jump-post-hook nil
-  "Hook that is run after jumping to the target in `grepint-grep-action-jump'.")
+(defvar helm-grepint-grep-jump-pre-hook '(push-mark)
+  "Hook that is run before jumping to the target in `helm-grepint-grep-action-jump'.")
+(defvar helm-grepint-grep-jump-post-hook nil
+  "Hook that is run after jumping to the target in `helm-grepint-grep-action-jump'.")
 
-(defun grepint-grep-parse-line (line)
+(defun helm-grepint-grep-parse-line (line)
   "Parse a LINE of output from grep-compatible programs.
 
 Returns a list of (file line contents) or nil if the line could not be parsed."
@@ -183,26 +183,26 @@ Returns a list of (file line contents) or nil if the line could not be parsed."
     (if ret
 	(mapcar #'(lambda (x) (match-string x line)) '(1 2 3)))))
 
-(defun grepint-grep-action-jump (candidate)
+(defun helm-grepint-grep-action-jump (candidate)
   "Jump to line in a file described by a grep -line CANDIDATE."
-  (run-hooks 'grepint-grep-jump-pre-hook)
-  (let ((items (grepint-grep-parse-line candidate)))
+  (run-hooks 'helm-grepint-grep-jump-pre-hook)
+  (let ((items (helm-grepint-grep-parse-line candidate)))
     (find-file (nth 0 items))
     (helm-goto-line (string-to-number (nth 1 items))))
-  (run-hooks 'grepint-grep-jump-post-hook))
+  (run-hooks 'helm-grepint-grep-jump-post-hook))
 
-(defun grepint-grep-process ()
-  "This is the candidates-process for `grepint-helm-source'."
-  (let ((cfg (grepint-get-grep-config (grepint-select-grep))))
-    (apply #'grepint-run-command
+(defun helm-grepint-grep-process ()
+  "This is the candidates-process for `helm-grepint-helm-source'."
+  (let ((cfg (helm-grepint-get-grep-config (helm-grepint-select-grep))))
+    (apply #'helm-grepint-run-command
 	   :extra-arguments (replace-regexp-in-string "  *" ".*" helm-pattern)
 	   (cdr cfg))))
 
-(defun grepint-grep-filter-one-by-one (candidate)
-  "Propertize each CANDIDATE provided by `grepint-helm-source'.
+(defun helm-grepint-grep-filter-one-by-one (candidate)
+  "Propertize each CANDIDATE provided by `helm-grepint-helm-source'.
 
 Uses `helm-grep-highlight-match' from helm-grep to provide line highlight."
-  (let ((items (grepint-grep-parse-line candidate)))
+  (let ((items (helm-grepint-grep-parse-line candidate)))
     (if items
 	(format "%s:%s:%s"
 		(propertize (nth 0 items) 'face compilation-info-face)
@@ -210,82 +210,82 @@ Uses `helm-grep-highlight-match' from helm-grep to provide line highlight."
 		(helm-grep-highlight-match (nth 2 items) t))
       "")))
 
-(defvar grepint-helm-map
+(defvar helm-grepint-helm-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map helm-map)
     (define-key map (kbd "<right>") 'helm-execute-persistent-action)
     map))
 
-(define-helm-type-attribute 'grepint
+(define-helm-type-attribute 'helm-grepint
   `((volatile)
     (delayed)
     (requires-pattern . 3)
     (default-directory . nil)))
 
-(defvar grepint-helm-source
+(defvar helm-grepint-helm-source
   '((name . "Generic grep interface")
-    (candidates-process . grepint-grep-process)
-    (type . grepint)
-    (action . (("Jump to" . grepint-grep-action-jump)))
+    (candidates-process . helm-grepint-grep-process)
+    (type . helm-grepint)
+    (action . (("Jump to" . helm-grepint-grep-action-jump)))
     (candidate-number-limit . 500)
-    (filter-one-by-one . grepint-grep-filter-one-by-one)))
+    (filter-one-by-one . helm-grepint-grep-filter-one-by-one)))
 
-(defun grepint--grep (in-root)
+(defun helm-grepint--grep (in-root)
   "Run grep either in current directory or if IN-ROOT, in a root directory..
 
 The grep function is determined by the contents of
-`grepint-grep-configs' and the order of `grepint-grep-list'.  The
+`helm-grepint-grep-configs' and the order of `helm-grepint-grep-list'.  The
 root directory is determined by the :root-directory-function
-property of an element of `grepint-grep-configs'."
-  (let ((name (grepint-select-grep))
+property of an element of `helm-grepint-grep-configs'."
+  (let ((name (helm-grepint-select-grep))
 	(default-directory default-directory))
     (when in-root
       (setq default-directory
-	    (funcall (or (grepint-grep-config-property name :root-directory-function)
-			 #'grepint-grep-default-root))))
-    (helm :sources '(grepint-helm-source)
+	    (funcall (or (helm-grepint-grep-config-property name :root-directory-function)
+			 #'helm-grepint-grep-default-root))))
+    (helm :sources '(helm-grepint-helm-source)
 	  :buffer (format "Grepint%s: %s" (if in-root "-root" "") name)
-	  :keymap grepint-helm-map
-	  :input (funcall grepint-pre-input-function))))
+	  :keymap helm-grepint-helm-map
+	  :input (funcall helm-grepint-pre-input-function))))
 
 ;;;###autoload
-(defun grepint-grep ()
+(defun helm-grepint-grep ()
   "Run grep in the current directory.
 
 The grep function is determined by the contents of
-`grepint-grep-configs' and the order of `grepint-grep-list'."
+`helm-grepint-grep-configs' and the order of `helm-grepint-grep-list'."
   (interactive)
-  (grepint--grep nil))
+  (helm-grepint--grep nil))
 
 ;;;###autoload
-(defun grepint-grep-root ()
-  "This function is the same as `grepint-grep', but it runs the grep in a root directory."
+(defun helm-grepint-grep-root ()
+  "This function is the same as `helm-grepint-grep', but it runs the grep in a root directory."
   (interactive)
 
-  (grepint--grep t))
+  (helm-grepint--grep t))
 
 ;;;###autoload
-(defun grepint-set-default-config ()
-  "Set the default grep configuration into `grepint-grep-configs' and `grepint-grep-list'."
+(defun helm-grepint-set-default-config ()
+  "Set the default grep configuration into `helm-grepint-grep-configs' and `helm-grepint-grep-list'."
 
-  (setq grepint-grep-configs nil)
+  (setq helm-grepint-grep-configs nil)
 
-  (defun grepint-git-grep-locate-root ()
+  (defun helm-grepint-git-grep-locate-root ()
     (locate-dominating-file (file-name-as-directory
 			     (expand-file-name (file-truename default-directory)))
 			    ".git"))
 
-  (grepint-add-grep-config git-grep
+  (helm-grepint-add-grep-config git-grep
 			   :command "git"
 			   :arguments "--no-pager grep --line-number --no-color"
-			   :enable-function grepint-git-grep-locate-root
-			   :root-directory-function grepint-git-grep-locate-root)
+			   :enable-function helm-grepint-git-grep-locate-root
+			   :root-directory-function helm-grepint-git-grep-locate-root)
 
-  (grepint-add-grep-config ag
+  (helm-grepint-add-grep-config ag
 			   :command "ag"
 			   :arguments "--nocolor --ignore-case --search-zip --nogroup")
 
-  (setq grepint-grep-list '(git-grep ag)))
+  (setq helm-grepint-grep-list '(git-grep ag)))
 
-(provide 'grepint)
-;;; grepint.el ends here
+(provide 'helm-grepint)
+;;; helm-grepint.el ends here
