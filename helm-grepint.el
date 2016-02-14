@@ -6,7 +6,7 @@
 ;; Maintainer: Kalle Kankare <kalle.kankare@iki.fi>
 ;; Created: 19 Sep 2015
 ;; Keywords: grep, grepping, searching, helm
-;; Version: 0.5.4
+;; Version: 0.5.5
 ;; Package-Requires: ((helm "1.0") (emacs "24"))
 
 ;; This file is not part of GNU Emacs.
@@ -57,6 +57,13 @@
 ;; Look into the function `helm-grepint-set-default-config' to see how the default
 ;; cases are configured. Also look into `helm-grepint-add-grep-config' for more
 ;; details on what is required for a new grep to be defined.
+
+;; ### Changes
+
+;; Version 0.5.5
+
+;; - Fix swooping into multiple files within a helm session. Previously it
+;;   would change default-directory every swoop.
 
 ;;; Code:
 
@@ -187,8 +194,9 @@ Returns a list of (file line contents) or nil if the line could not be parsed."
   "Jump to line in a file described by a grep -line CANDIDATE."
   (run-hooks 'helm-grepint-grep-jump-pre-hook)
   (let ((items (helm-grepint-grep-parse-line candidate)))
-    (find-file (nth 0 items))
-    (helm-goto-line (string-to-number (nth 1 items))))
+    (with-helm-default-directory (helm-default-directory)
+	(find-file (nth 0 items))
+      (helm-goto-line (string-to-number (nth 1 items)))))
   (run-hooks 'helm-grepint-grep-jump-post-hook))
 
 (defun helm-grepint-grep-process ()
