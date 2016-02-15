@@ -66,6 +66,7 @@
 ;;   would change default-directory every swoop.
 ;; - Add action to open the helm buffer in grep-mode. This enables the use of
 ;;   e.g. `wgrep'.
+;; - Add `helm-grepint-grep-ask-root' and set it as default for ag.
 
 ;;; Code:
 
@@ -175,6 +176,10 @@ automatically."
 (defun helm-grepint-grep-default-root ()
   "Get the default root directory if :root-directory-function isn't defined."
   default-directory)
+
+(defun helm-grepint-grep-ask-root ()
+  "Ask the root directory from user."
+  (expand-file-name (read-directory-name "Root directory: ")))
 
 ;; Helm interface
 (defvar helm-grepint-grep-jump-pre-hook '(push-mark)
@@ -302,7 +307,8 @@ The grep function is determined by the contents of
 
   (helm-grepint-add-grep-config ag
 			   :command "ag"
-			   :arguments "--nocolor --ignore-case --search-zip --nogroup")
+			   :arguments "--nocolor --ignore-case --search-zip --nogroup"
+			   :root-directory-function helm-grepint-grep-ask-root)
 
   (setq helm-grepint-grep-list '(git-grep ag)))
 
