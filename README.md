@@ -1,5 +1,5 @@
 ## helm-grepint.el
-*Generic helm interface to grep
+*Generic helm interface to grep*
 
 ---
 [![License GPLv3](https://img.shields.io/badge/license-GPL_v3-green.svg)](http://www.gnu.org/licenses/gpl-3.0.html)
