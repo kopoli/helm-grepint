@@ -1,8 +1,9 @@
 ## helm-grepint.el
-*Generic helm interface to grep -*- lexical-binding: t -*-*
+*Generic helm interface to grep
 
 ---
 [![License GPLv3](https://img.shields.io/badge/license-GPL_v3-green.svg)](http://www.gnu.org/licenses/gpl-3.0.html)
+[![MELPA](https://melpa.org/packages/helm-grepint-badge.svg)](https://melpa.org/#/helm-grepint)
 
 ### Description
 
@@ -35,6 +36,16 @@ git-grep where it greps from the git root directory.
 Look into the function `helm-grepint-set-default-config` to see how the default
 cases are configured. Also look into `helm-grepint-add-grep-config` for more
 details on what is required for a new grep to be defined.
+
+### Changes
+
+Version 0.5.5
+
+- Fix swooping into multiple files within a helm session. Previously it
+  would change default-directory every swoop.
+- Add action to open the helm buffer in grep-mode. This enables the use of
+  e.g. `wgrep`.
+- Add `helm-grepint-grep-ask-root` and set it as default for ag.
 
 ### Function Documentation
 
@@ -95,6 +106,10 @@ automatically.
 
 Get the default root directory if :root-directory-function isn’t defined.
 
+#### `(helm-grepint-grep-ask-root)`
+
+Ask the root directory from user.
+
 #### `(helm-grepint-grep-parse-line LINE)`
 
 Parse a LINE of output from grep-compatible programs.
@@ -104,6 +119,10 @@ Returns a list of (file line contents) or nil if the line could not be parsed.
 #### `(helm-grepint-grep-action-jump CANDIDATE)`
 
 Jump to line in a file described by a grep -line CANDIDATE.
+
+#### `(helm-grepint-grep-action-mode CANDIDATE)`
+
+Open a copy of the helm buffer in `grep-mode`.
 
 #### `(helm-grepint-grep-process)`
 

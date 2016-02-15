@@ -7,6 +7,7 @@
 ;; Created: 19 Sep 2015
 ;; Keywords: grep, grepping, searching, helm
 ;; Version: 0.5.5
+;; URL: https://github.com/kopoli/helm-grepint
 ;; Package-Requires: ((helm "1.0") (emacs "24"))
 
 ;; This file is not part of GNU Emacs.
