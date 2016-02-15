@@ -64,6 +64,8 @@
 
 ;; - Fix swooping into multiple files within a helm session. Previously it
 ;;   would change default-directory every swoop.
+;; - Add action to open the helm buffer in grep-mode. This enables the use of
+;;   e.g. `wgrep'.
 
 ;;; Code:
 
@@ -199,6 +201,14 @@ Returns a list of (file line contents) or nil if the line could not be parsed."
       (helm-goto-line (string-to-number (nth 1 items)))))
   (run-hooks 'helm-grepint-grep-jump-post-hook))
 
+(defun helm-grepint-grep-action-mode (candidate)
+  "Open a copy of the helm buffer in `grep-mode'."
+  (with-helm-buffer
+    (let ((newbuf (format "* grep-mode %s *" (buffer-name))))
+      (copy-to-buffer newbuf (point-min) (point-max))
+      (switch-to-buffer newbuf)
+      (grep-mode))))
+
 (defun helm-grepint-grep-process ()
   "This is the candidates-process for `helm-grepint-helm-source'."
   (let ((cfg (helm-grepint-get-grep-config (helm-grepint-select-grep))))
@@ -234,7 +244,8 @@ Uses `helm-grep-highlight-match' from helm-grep to provide line highlight."
   '((name . "Generic grep interface")
     (candidates-process . helm-grepint-grep-process)
     (type . helm-grepint)
-    (action . (("Jump to" . helm-grepint-grep-action-jump)))
+    (action . (("Jump to" . helm-grepint-grep-action-jump)
+	       ("Open in grep-mode" . helm-grepint-grep-action-mode)))
     (candidate-number-limit . 500)
     (filter-one-by-one . helm-grepint-grep-filter-one-by-one)))
 
