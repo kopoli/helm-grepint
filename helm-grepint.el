@@ -132,6 +132,9 @@ or property was not found."
 	(plist-put (cdr cmd) property (car new-value))
 	(car new-value)))))
 
+(defvar helm-grepint-current-command nil
+  "The current command that is being run. It is available for actions.")
+
 (defun helm-grepint-run-command (&rest plist)
   "Run a grep command from PLIST.
 
@@ -141,13 +144,15 @@ The command line is constructed with the following PLIST items:
 
 The :arguments is split on whitespace, but :extra-arguments are
 used as is."
-  (let ((cmd (executable-find (plist-get plist :command))) proc)
+  (let ((cmd (executable-find (plist-get plist :command)))
+	(args (append (split-string (plist-get plist :arguments))
+		      (list (plist-get plist :extra-arguments))))
+	proc)
     (when cmd
+      (setq helm-grepint-current-command
+	    (mapconcat #'identity (append (list cmd) args) " "))
       (setq proc (apply 'start-process "helm-grepint" nil
-			(append
-			 (list cmd)
-			 (split-string (plist-get plist :arguments))
-			 (list (plist-get plist :extra-arguments)))))
+			(append (list cmd) args)))
       (set-process-sentinel proc
 			    (lambda (process event)
 			      (helm-process-deferred-sentinel-hook process event (helm-default-directory))))
@@ -209,11 +214,22 @@ Returns a list of (file line contents) or nil if the line could not be parsed."
 
 (defun helm-grepint-grep-action-mode (candidate)
   "Open a copy of the helm buffer in `grep-mode'."
-  (with-helm-buffer
-    (let ((newbuf (format "* grep-mode %s *" (buffer-name))))
-      (copy-to-buffer newbuf (point-min) (point-max))
-      (switch-to-buffer newbuf)
-      (grep-mode))))
+  (let ((newbuf (format "* grep-mode %s *" (buffer-name)))
+	(oldparams
+	 (with-helm-buffer
+	   (list (current-buffer)
+		 (save-excursion (goto-char (point-min)) (forward-line 1) (point))
+		 (point-max)))))
+    (with-current-buffer (get-buffer-create newbuf)
+      (let ((inhibit-read-only t))
+	(erase-buffer)
+	(apply #'insert-buffer-substring oldparams)
+	(goto-char (point-min))
+	(insert (format (concat "-*- mode: grep; default-directory: \"%s\" -*-\n"
+				"\n\n%s\n")
+			(helm-default-directory) helm-grepint-current-command))))
+    (switch-to-buffer newbuf)
+    (grep-mode)))
 
 (defun helm-grepint-grep-process ()
   "This is the candidates-process for `helm-grepint-helm-source'."
@@ -262,6 +278,7 @@ The grep function is determined by the contents of
 `helm-grepint-grep-configs' and the order of `helm-grepint-grep-list'.  The
 root directory is determined by the :root-directory-function
 property of an element of `helm-grepint-grep-configs'."
+  (setq helm-grepint-current-command nil)
   (let ((name (helm-grepint-select-grep))
 	(default-directory default-directory))
     (when in-root
