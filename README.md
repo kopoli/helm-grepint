@@ -122,7 +122,7 @@ Jump to line in a file described by a grep -line CANDIDATE.
 
 #### `(helm-grepint-grep-action-mode CANDIDATE)`
 
-Open a copy of the helm buffer in `grep-mode`.
+Open a copy of the helm buffer in ‘grep-mode’.
 
 #### `(helm-grepint-grep-process)`
 
