@@ -6,7 +6,7 @@
 ;; Maintainer: Kalle Kankare <kalle.kankare@iki.fi>
 ;; Created: 19 Sep 2015
 ;; Keywords: grep, grepping, searching, helm
-;; Version: 0.5.6
+;; Version: 1.0.0
 ;; URL: https://github.com/kopoli/helm-grepint
 ;; Package-Requires: ((helm "1.0") (emacs "24"))
 
@@ -60,6 +60,11 @@
 ;; details on what is required for a new grep to be defined.
 
 ;; ### Changes
+
+;; Version 1.0.0
+
+;; - Add action to create a `grep-mode' buffer from the helm-buffer.
+;; - Add universal-argument to manually ask the used grep configuration.
 
 ;; Version 0.5.5
 

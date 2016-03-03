@@ -39,6 +39,11 @@ details on what is required for a new grep to be defined.
 
 ### Changes
 
+Version 1.0.0
+
+- Add action to create a `grep-mode` buffer from the helm-buffer.
+- Add universal-argument to manually ask the used grep configuration.
+
 Version 0.5.5
 
 - Fix swooping into multiple files within a helm session. Previously it
@@ -94,13 +99,14 @@ The command line is constructed with the following PLIST items:
 The :arguments is split on whitespace, but :extra-arguments are
 used as is.
 
-#### `(helm-grepint-select-grep)`
+#### `(helm-grepint-select-grep ASK-GREP)`
 
-Select the grep based on :enable-function from ‘helm-grepint-grep-configs’.
+Select the grep based on :enable-function from `helm-grepint-grep-configs`.
 
-The greps are compared in order of ‘helm-grepint-grep-list’.  If the
-grep does not have :enable-function property, select it
-automatically.
+If ASK-GREP is non-nil, select the grep by asking with
+`completing-read`.  The greps are compared in order of
+`helm-grepint-grep-list`.  If the grep does not
+have :enable-function property, select it automatically.
 
 #### `(helm-grepint-grep-default-root)`
 
@@ -124,6 +130,8 @@ Jump to line in a file described by a grep -line CANDIDATE.
 
 Open a copy of the helm buffer in ‘grep-mode’.
 
+CANDIDATE is ignored.
+
 #### `(helm-grepint-grep-process)`
 
 This is the candidates-process for ‘helm-grepint-helm-source’.
@@ -134,16 +142,20 @@ Propertize each CANDIDATE provided by ‘helm-grepint-helm-source’.
 
 Uses ‘helm-grep-highlight-match’ from helm-grep to provide line highlight.
 
-#### `(helm-grepint-grep)`
+#### `(helm-grepint-grep &optional ARG)`
 
 Run grep in the current directory.
+
+See the usage for ARG in `helm-grepint--grep`.
 
 The grep function is determined by the contents of
 ‘helm-grepint-grep-configs’ and the order of ‘helm-grepint-grep-list’.
 
-#### `(helm-grepint-grep-root)`
+#### `(helm-grepint-grep-root &optional ARG)`
 
-This function is the same as ‘helm-grepint-grep’, but it runs the grep in a root directory.
+Function `helm-grepint-grep` is run in a root directory.
+
+See the usage for ARG in `helm-grepint--grep`.
 
 #### `(helm-grepint-set-default-config)`
 
