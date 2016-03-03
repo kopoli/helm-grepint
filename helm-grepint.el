@@ -159,13 +159,18 @@ used as is."
       proc)))
 
 
-(defun helm-grepint-select-grep ()
+(defun helm-grepint-select-grep (ask-grep)
   "Select the grep based on :enable-function from `helm-grepint-grep-configs'.
 
-The greps are compared in order of `helm-grepint-grep-list'.  If the
-grep does not have :enable-function property, select it
-automatically."
+If ASK-GREP is non-nil, select the grep by asking with
+`completing-read'.  The greps are compared in order of
+`helm-grepint-grep-list'.  If the grep does not
+have :enable-function property, select it automatically."
+
   (let (name enabler (greps helm-grepint-grep-list))
+    (when ask-grep
+      (setq greps (list (intern (completing-read "Select grep: "
+    						  helm-grepint-grep-list nil t)))))
     (while greps
       (setq name (car greps))
       (setq enabler (or (helm-grepint-grep-config-property name :enable-function)
@@ -233,7 +238,7 @@ Returns a list of (file line contents) or nil if the line could not be parsed."
 
 (defun helm-grepint-grep-process ()
   "This is the candidates-process for `helm-grepint-helm-source'."
-  (let ((cfg (helm-grepint-get-grep-config (helm-grepint-select-grep))))
+  (let ((cfg (helm-grepint-get-grep-config helm--grep-selected-grep)))
     (apply #'helm-grepint-run-command
 	   :extra-arguments (replace-regexp-in-string "  *" ".*" helm-pattern)
 	   (cdr cfg))))
@@ -271,7 +276,7 @@ Uses `helm-grep-highlight-match' from helm-grep to provide line highlight."
     (candidate-number-limit . 500)
     (filter-one-by-one . helm-grepint-grep-filter-one-by-one)))
 
-(defun helm-grepint--grep (in-root)
+(defun helm-grepint--grep (in-root &optional arg)
   "Run grep either in current directory or if IN-ROOT, in a root directory..
 
 The grep function is determined by the contents of
@@ -279,7 +284,7 @@ The grep function is determined by the contents of
 root directory is determined by the :root-directory-function
 property of an element of `helm-grepint-grep-configs'."
   (setq helm-grepint-current-command nil)
-  (let ((name (helm-grepint-select-grep))
+  (let ((name (helm-grepint-select-grep (and arg (> arg 1))))
 	(default-directory default-directory))
     (when in-root
       (setq default-directory
@@ -288,23 +293,24 @@ property of an element of `helm-grepint-grep-configs'."
     (helm :sources '(helm-grepint-helm-source)
 	  :buffer (format "Grepint%s: %s" (if in-root "-root" "") name)
 	  :keymap helm-grepint-helm-map
-	  :input (funcall helm-grepint-pre-input-function))))
+	  :input (funcall helm-grepint-pre-input-function)
+	  :helm--grep-selected-grep name)))
 
 ;;;###autoload
-(defun helm-grepint-grep ()
+(defun helm-grepint-grep (&optional arg)
   "Run grep in the current directory.
 
 The grep function is determined by the contents of
 `helm-grepint-grep-configs' and the order of `helm-grepint-grep-list'."
-  (interactive)
-  (helm-grepint--grep nil))
+  (interactive "p")
+  (helm-grepint--grep nil arg))
 
 ;;;###autoload
-(defun helm-grepint-grep-root ()
+(defun helm-grepint-grep-root (&optional arg)
   "This function is the same as `helm-grepint-grep', but it runs the grep in a root directory."
-  (interactive)
+  (interactive "p")
 
-  (helm-grepint--grep t))
+  (helm-grepint--grep t arg))
 
 ;;;###autoload
 (defun helm-grepint-set-default-config ()
