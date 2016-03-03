@@ -113,6 +113,7 @@ The configuration can have the following items:
  - Function that returns a string of a directory that is regarded
    as the root directory when running `helm-grepint-grep-root'.  If
    this is nil, `helm-grepint-grep-root' behaves exactly as `helm-grepint-grep'."
+  (declare (indent defun))
   `(progn (assq-delete-all ',name  helm-grepint-grep-configs)
 	  (push (cons ',name ',configuration) helm-grepint-grep-configs)))
 
@@ -333,15 +334,15 @@ See the usage for ARG in `helm-grepint--grep'."
 			    ".git"))
 
   (helm-grepint-add-grep-config git-grep
-			   :command "git"
-			   :arguments "--no-pager grep --line-number --no-color"
-			   :enable-function helm-grepint-git-grep-locate-root
-			   :root-directory-function helm-grepint-git-grep-locate-root)
+    :command "git"
+    :arguments "--no-pager grep --line-number --no-color"
+    :enable-function helm-grepint-git-grep-locate-root
+    :root-directory-function helm-grepint-git-grep-locate-root)
 
   (helm-grepint-add-grep-config ag
-			   :command "ag"
-			   :arguments "--nocolor --ignore-case --search-zip --nogroup"
-			   :root-directory-function helm-grepint-grep-ask-root)
+    :command "ag"
+    :arguments "--nocolor --ignore-case --search-zip --nogroup"
+    :root-directory-function helm-grepint-grep-ask-root)
 
   (setq helm-grepint-grep-list '(git-grep ag)))
 
