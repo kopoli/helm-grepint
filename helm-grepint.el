@@ -133,7 +133,7 @@ or property was not found."
 	(car new-value)))))
 
 (defvar helm-grepint-current-command nil
-  "The current command that is being run. It is available for actions.")
+  "The current command that is being run.  It is available for actions.")
 
 (defun helm-grepint-run-command (&rest plist)
   "Run a grep command from PLIST.
@@ -218,7 +218,9 @@ Returns a list of (file line contents) or nil if the line could not be parsed."
   (run-hooks 'helm-grepint-grep-jump-post-hook))
 
 (defun helm-grepint-grep-action-mode (candidate)
-  "Open a copy of the helm buffer in `grep-mode'."
+  "Open a copy of the helm buffer in `grep-mode'.
+
+CANDIDATE is ignored."
   (let ((newbuf (format "* grep-mode %s *" (buffer-name)))
 	(oldparams
 	 (with-helm-buffer
@@ -277,7 +279,10 @@ Uses `helm-grep-highlight-match' from helm-grep to provide line highlight."
     (filter-one-by-one . helm-grepint-grep-filter-one-by-one)))
 
 (defun helm-grepint--grep (in-root &optional arg)
-  "Run grep either in current directory or if IN-ROOT, in a root directory..
+  "Run grep either in current directory or if IN-ROOT, in a root directory.
+
+ARG is the prefix argument and given \\[universal-argument] this
+triggers manual selection of grep configuration,
 
 The grep function is determined by the contents of
 `helm-grepint-grep-configs' and the order of `helm-grepint-grep-list'.  The
@@ -300,6 +305,8 @@ property of an element of `helm-grepint-grep-configs'."
 (defun helm-grepint-grep (&optional arg)
   "Run grep in the current directory.
 
+See the usage for ARG in `helm-grepint--grep'.
+
 The grep function is determined by the contents of
 `helm-grepint-grep-configs' and the order of `helm-grepint-grep-list'."
   (interactive "p")
@@ -307,7 +314,9 @@ The grep function is determined by the contents of
 
 ;;;###autoload
 (defun helm-grepint-grep-root (&optional arg)
-  "This function is the same as `helm-grepint-grep', but it runs the grep in a root directory."
+  "Function `helm-grepint-grep' is run in a root directory.
+
+See the usage for ARG in `helm-grepint--grep'."
   (interactive "p")
 
   (helm-grepint--grep t arg))
