@@ -95,6 +95,9 @@ These are the names in `helm-grepint-grep-configs'."
   "The function that supplies the pre-input for grep."
   :group 'helm-grepint)
 
+(defcustom helm-grepint-candidate-number-limit 500
+  "Number of candidates to display.")
+
 (defvar helm-grepint-grep-configs ()
   "Manipulate this with `helm-grepint-add-grep-config'.")
 
@@ -269,20 +272,15 @@ Uses `helm-grep-highlight-match' from helm-grep to provide line highlight."
     (define-key map (kbd "<right>") 'helm-execute-persistent-action)
     map))
 
-(define-helm-type-attribute 'helm-grepint
-  `((volatile)
-    (delayed)
-    (requires-pattern . 3)
-    (default-directory . nil)))
-
 (defvar helm-grepint-helm-source
-  '((name . "Generic grep interface")
-    (candidates-process . helm-grepint-grep-process)
-    (type . helm-grepint)
-    (action . (("Jump to" . helm-grepint-grep-action-jump)
-	       ("Open in grep-mode" . helm-grepint-grep-action-mode)))
-    (candidate-number-limit . 500)
-    (filter-one-by-one . helm-grepint-grep-filter-one-by-one)))
+  (helm-build-async-source "Generic grep interface"
+      :volatile t
+      :requires-pattern 3
+      :candidates-process #'helm-grepint-grep-process
+      :action '(("Jump to" . helm-grepint-grep-action-jump)
+	       ("Open in grep-mode" . helm-grepint-grep-action-mode))
+      :candidate-number-limit helm-grepint-candidate-number-limit
+      :filter-one-by-one #'helm-grepint-grep-filter-one-by-one))
 
 (defun helm-grepint--grep (in-root &optional arg)
   "Run grep either in current directory or if IN-ROOT, in a root directory.
