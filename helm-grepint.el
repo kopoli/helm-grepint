@@ -141,12 +141,19 @@ The configuration can have the following items:
    as the root directory when running `helm-grepint-grep-root'.  If
    this is nil, `helm-grepint-grep-root' behaves exactly as `helm-grepint-grep'."
   (declare (indent defun))
-  `(progn (assq-delete-all ',name  helm-grepint-grep-configs)
-	  (push (cons ',name ',configuration) helm-grepint-grep-configs)))
+  `(helm-grepint-grep-config ',name ',configuration))
 
-(defun helm-grepint-get-grep-config (name)
-  "Get the configuration associated with NAME."
-  (assoc name helm-grepint-grep-configs))
+(defun helm-grepint-grep-config (name &optional new-config)
+  "Get a grep configuration with NAME or set it to NEW-CONFIG."
+  (if (null new-config)
+      (assoc name helm-grepint-grep-configs)
+    (assq-delete-all name helm-grepint-grep-configs)
+    (push (cons name new-config) helm-grepint-grep-configs)))
+
+(define-obsolete-function-alias 'helm-grepint-get-grep-config 'helm-grepint-grep-config
+  "1.2.0" "Get the configuration associated with NAME.
+This is superseded by the `helm-grepint-grep-config' that has
+both get and set semantics.")
 
 (defun helm-grepint-grep-config-property (name property &rest new-value)
   "Get a config NAME's PROPERTY or set it to NEW-VALUE.
@@ -268,7 +275,7 @@ CANDIDATE is ignored."
 
 (defun helm-grepint-grep-process ()
   "This is the candidates-process for `helm-grepint-helm-source'."
-  (let ((cfg (helm-grepint-get-grep-config helm--grep-selected-grep)))
+  (let ((cfg (helm-grepint-grep-config helm--grep-selected-grep)))
     (apply #'helm-grepint-run-command
 	   :extra-arguments (replace-regexp-in-string "  *" ".*" helm-pattern)
 	   (cdr cfg))))
