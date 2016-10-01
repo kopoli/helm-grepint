@@ -115,7 +115,8 @@ These are the names in `helm-grepint-grep-configs'."
   :group 'helm-grepint)
 
 (defcustom helm-grepint-candidate-number-limit 500
-  "Number of candidates to display.")
+  "Number of candidates to display."
+  :group 'helm-grepint)
 
 (defconst helm-grepint-character-cases '(case-insensitive case-sensitive smart)
   "Possible character cases.
