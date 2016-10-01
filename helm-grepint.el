@@ -62,7 +62,7 @@
 
 ;; - `RET'/`F1' selects an item and closes the helm session.
 ;; - `F2' displays the grep results in a `grep-mode' buffer.
-;; - `Right arrow' selects the item, but does not close the helm session.  This
+;; - `Right-arrow' selects the item, but does not close the helm session.  This
 ;;   is similar as `helm-occur'.  Default helmkeybindings for this feature are
 ;;   also available (`C-j' and `C-z').
 ;; - `M-c' cycles case sensitiveness.
