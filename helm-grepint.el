@@ -6,7 +6,7 @@
 ;; Maintainer: Kalle Kankare <kalle.kankare@iki.fi>
 ;; Created: 19 Sep 2015
 ;; Keywords: grep, grepping, searching, helm
-;; Version: 1.1.1
+;; Version: 1.2.0
 ;; URL: https://github.com/kopoli/helm-grepint
 ;; Package-Requires: ((helm "1.0") (emacs "24"))
 
@@ -29,29 +29,43 @@
 
 ;; ### Description
 
-;; This package solves the following problem for me:
+;; This package solves the following problems for me:
 ;; - A single function call interface to grep and therefore keybinding.
 ;; - Selects the grep based on context: Inside a git-repository, runs
-;;   git-grep, otherwise runs ag.
+;;   `git-grep', otherwise runs `ag'.
 ;; - Uses helm to select candidates and jumps to the given line with RET.
+
+;; And the following additional problems (as of version 1.2.0):
+;; - A second interactive function `helm-grepint-grep-root'.  This runs the
+;;   grepping inside a root directory.  By default this has been defined for
+;;   the git-grep where it greps from the git root directory.
+;; - Inside a huge git repository one can create a file defined in the
+;;   variable `helm-grepint-default-config-ag-presearch-marker-file' and it
+;;   will set that directory as the root directory for grepping.  It uses `ag'
+;;   instead of `git-grep' as the grep.
+;; - The grepping is case-insensitive by default, but if an upper-case letter
+;;   is given case-sensitive grepping is done.
 
 ;; The following enables the aforementioned:
 
 ;;         (require 'helm-grepint)
-;;         (helm-grepint-set-default-config)
+;;         (helm-grepint-set-default-config-latest)
 ;;         (global-set-key (kbd "C-c g") #'helm-grepint-grep)
+;;         (global-set-key (kbd "C-c G") #'helm-grepint-grep-root)
+
+;; The original configuration (i.e. without the above additional features) is
+;; available with the following:
+
+;;         (helm-grepint-set-default-config)
 
 ;; ### Key bindings within helm
 
-;; - RET selects an item and closes the helm session.
-;; - Right arrow selects the item, but does not close the helm session.  This
-;;   is similar as `helm-occur'.
-
-;; ### Additional features
-
-;; This has a second interactive function `helm-grepint-grep-root'.  This runs the
-;; grepping inside a root directory.  By default this has been defined for the
-;; git-grep where it greps from the git root directory.
+;; - `RET'/`F1' selects an item and closes the helm session.
+;; - `F2' displays the grep results in a `grep-mode' buffer.
+;; - `Right arrow' selects the item, but does not close the helm session.  This
+;;   is similar as `helm-occur'.  Default helmkeybindings for this feature are
+;;   also available (`C-j' and `C-z').
+;; - `M-c' cycles case sensitiveness.
 
 ;; ### Customization
 
@@ -60,6 +74,19 @@
 ;; details on what is required for a new grep to be defined.
 
 ;; ### Changes
+
+;; Version 1.2.0
+
+;; - Obsoleted `helm-grepint-get-grep-config' in favor of
+;;   `helm-grepint-grep-config'.
+;; - Make the ignore-case a separate argument in the grep configuration.  This
+;;   way it can be toggled on and off easily.
+;; - Add case-fold-search support (case-(in)sensitiveness).  Add Helm
+;;   keybinding `M-c' to control it.
+;; - Add smart case-sensitiveness checking.
+;; - Add a new configuration `helm-grepint-set-default-config-v1.2.0' which
+;;   makes the smart cases-sensitiveness as the default.  The configuration is
+;;   now the `helm-grepint-set-default-config-latest'.
 
 ;; Version 1.1.1
 
@@ -489,11 +516,26 @@ to a subdirectory."
 				     :root-directory-function #'helm-grepint-ag-presearch-locate-root)
   (add-to-list 'helm-grepint-grep-list 'ag-presearch))
 
+(defun helm-grepint-set-default-config-v1.2.0 ()
+  "Set default grep configuration.
+
+Run `helm-grepint-set-default-config-v1.1.0' and then this function.
+
+Makes the `smart' character-case as the default.  Changes the
+order of cycling the character-cases.  After the `smart' comes
+case-sensitive."
+
+  (helm-grepint-set-default-config-v1.1.0)
+
+  ;; Make the smart case default and the case-sensitive next to it.
+  (setq helm-grepint-character-cases '(smart case-sensitive case-insensitive)
+  	helm-grepint-initial-case 'smart))
+
 ;;;###autoload
 (fset 'helm-grepint-set-default-config #'helm-grepint-set-default-config-v1.0.0)
 
 ;;;###autoload
-(fset 'helm-grepint-set-default-config-latest #'helm-grepint-set-default-config-v1.1.0)
+(fset 'helm-grepint-set-default-config-latest #'helm-grepint-set-default-config-v1.2.0)
 
 (provide 'helm-grepint)
 ;;; helm-grepint.el ends here
