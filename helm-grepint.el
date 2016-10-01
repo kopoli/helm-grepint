@@ -117,6 +117,27 @@ These are the names in `helm-grepint-grep-configs'."
 (defcustom helm-grepint-candidate-number-limit 500
   "Number of candidates to display.")
 
+(defconst helm-grepint-character-cases '(case-insensitive case-sensitive smart)
+  "Possible character cases.
+This is the order in which they are cycled with the
+`helm-grepint-cycle-character-case' function.
+
+Smart case here means that if user inputs only lower case
+letters, the grepping should ignore character case.  If even a
+single upper-case letter is given, character case is respected.
+In Emacs nomenclature case sensitivity is called
+`case-fold-search'.")
+
+(defcustom helm-grepint-initial-case 'case-insensitive
+  "Initial character case handling.
+To be in effect, the `:ignore-case-argument' needs to be set in
+the grep configuration."
+  :type '(radio
+          (const :tag "Case-insensitive" case-insensitive)
+          (const :tag "Case-sensitive" case-sensitive)
+          (const :tag "Smart" smart))
+  :group 'helm-grepint)
+
 (defvar helm-grepint-grep-configs ()
   "Manipulate this with `helm-grepint-add-grep-config'.")
 
@@ -139,7 +160,14 @@ The configuration can have the following items:
 :root-directory-function
  - Function that returns a string of a directory that is regarded
    as the root directory when running `helm-grepint-grep-root'.  If
-   this is nil, `helm-grepint-grep-root' behaves exactly as `helm-grepint-grep'."
+   this is nil, `helm-grepint-grep-root' behaves exactly as `helm-grepint-grep'.
+
+:ignore-case-argument
+ - The argument for the grep command that makes grepping ignore
+   character case.  Traditionally this is `--ignore-case' for a
+   number of different greps.  This needs to be defined or the
+   `helm-grepint-cycle-character-case' function has no effect."
+
   (declare (indent defun))
   `(helm-grepint-grep-config ',name ',configuration))
 
@@ -170,6 +198,29 @@ or property was not found."
 (defvar helm-grepint-current-command nil
   "The current command that is being run.  It is available for actions.")
 
+(defun helm-grepint--prepare-args(plist)
+  "Prepare argument list for running the grep."
+  (let ((igncasearg (plist-get plist :ignore-case-arg))
+	(args (split-string (plist-get plist :arguments)))
+	(searchstr (plist-get plist :extra-arguments)))
+
+    (when igncasearg
+      (with-helm-buffer
+	(let ((ccase helm-grepint--character-case))
+	  (when (equal ccase 'smart)
+	    (setq ccase
+		  (if (let ((case-fold-search nil))
+			(string-match-p "[[:upper:]]" searchstr))
+		      'case-sensitive
+		    'case-insensitive)))
+	  (setq args
+		(progn
+		  (delete igncasearg args)
+		  (if (equal ccase 'case-insensitive)
+		      (append args (list igncasearg))
+		    args))))))
+    (append args (list searchstr))))
+
 (defun helm-grepint-run-command (&rest plist)
   "Run a grep command from PLIST.
 
@@ -180,8 +231,7 @@ The command line is constructed with the following PLIST items:
 The :arguments is split on whitespace, but :extra-arguments are
 used as is."
   (let ((cmd (executable-find (plist-get plist :command)))
-	(args (append (split-string (plist-get plist :arguments))
-		      (list (plist-get plist :extra-arguments))))
+	(args (helm-grepint--prepare-args plist))
 	proc)
     (when cmd
       (setq helm-grepint-current-command
@@ -292,10 +342,26 @@ Uses `helm-grep-highlight-match' from helm-grep to provide line highlight."
 		(helm-grep-highlight-match (nth 2 items) t))
       "")))
 
+(defun helm-grepint--header-name (name)
+  "Displays the helm header with given source NAME.
+
+Additionally displays the used character case."
+  (format "%s [%s]" name (symbol-name helm-grepint--character-case)))
+
+(defun helm-grepint-cycle-character-case ()
+  "Select the next one from the `helm-grepint-character-cases' list."
+  (interactive)
+  (with-helm-buffer
+    (setq helm-grepint--character-case
+	  (let ((cases helm-grepint-character-cases))
+	    (cadr (member helm-grepint--character-case (append cases cases)))))
+    (helm-force-update)))
+
 (defvar helm-grepint-helm-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map helm-map)
     (define-key map (kbd "<right>") 'helm-execute-persistent-action)
+    (define-key map (kbd "M-c") #'helm-grepint-cycle-character-case)
     map))
 
 (defvar helm-grepint-helm-source
@@ -306,6 +372,7 @@ Uses `helm-grep-highlight-match' from helm-grep to provide line highlight."
       :action '(("Jump to" . helm-grepint-grep-action-jump)
 	       ("Open in grep-mode" . helm-grepint-grep-action-mode))
       :candidate-number-limit helm-grepint-candidate-number-limit
+      :header-name #'helm-grepint--header-name
       :filter-one-by-one #'helm-grepint-grep-filter-one-by-one))
 
 (defun helm-grepint--grep (in-root &optional arg)
@@ -329,7 +396,8 @@ property of an element of `helm-grepint-grep-configs'."
 	  :buffer (format "Grepint%s: %s" (if in-root "-root" "") name)
 	  :keymap helm-grepint-helm-map
 	  :input (funcall helm-grepint-pre-input-function)
-	  :helm--grep-selected-grep name)))
+	  :helm--grep-selected-grep name
+	  :helm-grepint--character-case helm-grepint-initial-case)))
 
 ;;;###autoload
 (defun helm-grepint-grep (&optional arg)
@@ -364,13 +432,15 @@ See the usage for ARG in `helm-grepint--grep'."
 
   (helm-grepint-add-grep-config git-grep
     :command "git"
-    :arguments "--no-pager grep --ignore-case --line-number --no-color"
+    :arguments "--no-pager grep --line-number --no-color"
+    :ignore-case-arg "--ignore-case"
     :enable-function helm-grepint-git-grep-locate-root
     :root-directory-function helm-grepint-git-grep-locate-root)
 
   (helm-grepint-add-grep-config ag
     :command "ag"
-    :arguments "--nocolor --ignore-case --search-zip --nogroup"
+    :arguments "--nocolor --search-zip --nogroup"
+    :ignore-case-arg "--ignore-case"
     :root-directory-function helm-grepint-grep-ask-root)
 
   (setq helm-grepint-grep-list '(git-grep ag)))
