@@ -327,7 +327,7 @@ CANDIDATE is ignored."
 
 (defun helm-grepint-grep-process ()
   "This is the candidates-process for `helm-grepint-helm-source'."
-  (let ((cfg (helm-grepint-grep-config helm--grep-selected-grep)))
+  (let ((cfg (helm-grepint-grep-config helm-grepint--selected-grep)))
     (apply #'helm-grepint-run-command
 	   :extra-arguments (replace-regexp-in-string "  *" ".*" helm-pattern)
 	   (cdr cfg))))
@@ -398,7 +398,7 @@ property of an element of `helm-grepint-grep-configs'."
 	  :buffer (format "Grepint%s: %s" (if in-root "-root" "") name)
 	  :keymap helm-grepint-helm-map
 	  :input (funcall helm-grepint-pre-input-function)
-	  :helm--grep-selected-grep name
+	  :helm-grepint--selected-grep name
 	  :helm-grepint--character-case helm-grepint-initial-case)))
 
 ;;;###autoload
