@@ -141,6 +141,12 @@ the grep configuration."
 (defvar helm-grepint-grep-configs ()
   "Manipulate this with `helm-grepint-add-grep-config'.")
 
+(defvar helm-grepint-grep-jump-pre-hook '(push-mark)
+  "Hook that is run before jumping to the target in `helm-grepint-grep-action-jump'.")
+
+(defvar helm-grepint-grep-jump-post-hook nil
+  "Hook that is run after jumping to the target in `helm-grepint-grep-action-jump'.")
+
 (defmacro helm-grepint-add-grep-config (name &rest configuration)
   "Add configuration NAME with properties from CONFIGURATION.
 
@@ -278,11 +284,6 @@ have :enable-function property, select it automatically."
   (expand-file-name (read-directory-name "Root directory: ")))
 
 ;; Helm interface
-(defvar helm-grepint-grep-jump-pre-hook '(push-mark)
-  "Hook that is run before jumping to the target in `helm-grepint-grep-action-jump'.")
-(defvar helm-grepint-grep-jump-post-hook nil
-  "Hook that is run after jumping to the target in `helm-grepint-grep-action-jump'.")
-
 (defun helm-grepint-grep-parse-line (line)
   "Parse a LINE of output from grep-compatible programs.
 
