@@ -392,7 +392,7 @@ this in huge git repositories and wanting to limit the searching
 to a subdirectory."
   (helm-grepint-set-default-config-v1.0.0)
 
-  (defun lec-ag-presearch-locate-root ()
+  (defun helm-grepint-ag-presearch-locate-root ()
     (let ((invalid nil)) ;; Creating a closure for the "invalid"
       (let ((hasfile
 	     (lambda (dir)
@@ -409,13 +409,12 @@ to a subdirectory."
 				 (expand-file-name (file-truename default-directory)))
 				hasfile))))
 
-  (helm-grepint-add-grep-config
-    ag-presearch
-    :command "ag"
-    :arguments "--nocolor --ignore-case --search-zip --nogroup"
-    :enable-function lec-ag-presearch-locate-root
-    :root-directory-function lec-ag-presearch-locate-root)
-
+  (helm-grepint-grep-config 'ag-presearch
+			    (cdr (append (helm-grepint-grep-config 'ag) nil)))
+  (helm-grepint-grep-config-property 'ag-presearch
+				     :enable-function #'helm-grepint-ag-presearch-locate-root)
+  (helm-grepint-grep-config-property 'ag-presearch
+				     :root-directory-function #'helm-grepint-ag-presearch-locate-root)
   (add-to-list 'helm-grepint-grep-list 'ag-presearch))
 
 ;;;###autoload
