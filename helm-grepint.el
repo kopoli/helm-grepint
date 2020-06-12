@@ -145,6 +145,11 @@ These are the names in `helm-grepint-grep-configs'."
   "Number of candidates to display."
   :group 'helm-grepint)
 
+(defcustom helm-grepint-min-pattern-length 3
+  "Minimum length of pattern to search for."
+  :group 'helm-grepint
+  :type 'integer)
+
 (defconst helm-grepint-character-cases '(case-insensitive case-sensitive smart)
   "Possible character cases.
 This is the order in which they are cycled with the
@@ -396,7 +401,7 @@ Additionally displays the used character case."
 (defvar helm-grepint-helm-source
   (helm-build-async-source "Generic grep interface"
       :volatile t
-      :requires-pattern 3
+      :requires-pattern helm-grepint-min-pattern-length
       :candidates-process #'helm-grepint-grep-process
       :action '(("Jump to" . helm-grepint-grep-action-jump)
 	       ("Open in grep-mode" . helm-grepint-grep-action-mode))
