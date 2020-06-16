@@ -126,6 +126,7 @@
 (require 'helm-utils)
 (require 'helm-grep)
 (require 'thingatpt)
+(require 'compile)
 
 (defcustom helm-grepint-grep-list ()
   "List of grep commands.
