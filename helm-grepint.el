@@ -124,6 +124,7 @@
 
 (require 'helm)
 (require 'helm-utils)
+(require 'helm-multi-match)
 (require 'helm-grep)
 (require 'thingatpt)
 (require 'compile)
@@ -362,7 +363,7 @@ CANDIDATE is ignored."
   "This is the candidates-process for `helm-grepint-helm-source'."
   (let ((cfg (helm-grepint-grep-config helm-grepint--selected-grep)))
     (apply #'helm-grepint-run-command
-	   :extra-arguments (replace-regexp-in-string "  *" ".*" helm-pattern)
+	   :extra-arguments (string-join (helm-mm-split-pattern helm-pattern t) ".*")
 	   (cdr cfg))))
 
 (defun helm-grepint-grep-filter-one-by-one (candidate)
