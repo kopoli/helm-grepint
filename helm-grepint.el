@@ -125,7 +125,6 @@
 (require 'helm)
 (require 'helm-utils)
 (require 'helm-multi-match)
-(require 'helm-grep)
 (require 'thingatpt)
 (require 'compile)
 
@@ -380,15 +379,13 @@ Supports backslash escaping for literal spaces. See
 	   (cdr cfg))))
 
 (defun helm-grepint-grep-filter-one-by-one (candidate)
-  "Propertize each CANDIDATE provided by `helm-grepint-helm-source'.
-
-Uses `helm-grep-highlight-match' from helm-grep to provide line highlight."
+  "Propertize each CANDIDATE provided by `helm-grepint-helm-source'."
   (let ((items (helm-grepint-grep-parse-line candidate)))
     (if items
 	(format "%s:%s:%s"
 		(propertize (nth 0 items) 'face compilation-info-face)
 		(propertize (nth 1 items) 'face compilation-line-face)
-		(helm-grep-highlight-match (nth 2 items) t))
+		(nth 2 items))
       "")))
 
 (defun helm-grepint--header-name (name)
