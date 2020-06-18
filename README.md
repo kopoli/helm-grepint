@@ -53,6 +53,16 @@ details on what is required for a new grep to be defined.
 
 ### Changes
 
+Version 1.3.0
+
+- Make minimum pattern length configurable with
+  `helm-grepint-min-pattern-length`.
+- Use `helm-mm-split-pattern` to split the pattern. Supports now backslash
+  escaped spaces.
+- Make pattern processing altogether configurable with grep-property
+  `:modify-pattern-function`.
+- Remove highlighting with `helm-grep-highlight-match` to fix a bug.
+
 Version 1.2.0
 
 - Obsoleted `helm-grepint-get-grep-config` in favor of
@@ -129,6 +139,11 @@ The configuration can have the following items:
    number of different greps.  This needs to be defined or the
    ‘helm-grepint-cycle-character-case’ function has no effect.
 
+:modify-pattern-function
+ - This modifies the ‘helm-pattern’ before giving it to the grep.
+   If this is nil, the default the ‘helm-grepint-pattern-modify’
+   function is used.
+
 #### `(helm-grepint-grep-config NAME &optional NEW-CONFIG)`
 
 Get a grep configuration with NAME or set it to NEW-CONFIG.
@@ -184,6 +199,13 @@ Open a copy of the helm buffer in ‘grep-mode’.
 
 CANDIDATE is ignored.
 
+#### `(helm-grepint-pattern-modify STR)`
+
+Splits the string at whitespace and replaces them with .*.
+
+Supports backslash escaping for literal spaces. See
+‘helm-mm-split-pattern’ for more details.
+
 #### `(helm-grepint-grep-process)`
 
 This is the candidates-process for ‘helm-grepint-helm-source’.
@@ -191,8 +213,6 @@ This is the candidates-process for ‘helm-grepint-helm-source’.
 #### `(helm-grepint-grep-filter-one-by-one CANDIDATE)`
 
 Propertize each CANDIDATE provided by ‘helm-grepint-helm-source’.
-
-Uses ‘helm-grep-highlight-match’ from helm-grep to provide line highlight.
 
 #### `(helm-grepint-cycle-character-case)`
 
