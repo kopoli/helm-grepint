@@ -75,6 +75,16 @@
 
 ;; ### Changes
 
+;; Version 1.3.0
+
+;; - Make minimum pattern length configurable with
+;;   `helm-grepint-min-pattern-length'.
+;; - Use `helm-mm-split-pattern' to split the pattern. Supports now backslash
+;;   escaped spaces.
+;; - Make pattern processing altogether configurable with grep-property
+;;   `:modify-pattern-function'.
+;; - Remove highlighting with `helm-grep-highlight-match' to fix a bug.
+
 ;; Version 1.2.0
 
 ;; - Obsoleted `helm-grepint-get-grep-config' in favor of
