@@ -1,6 +1,6 @@
 ;;; helm-grepint.el --- Generic helm interface to grep -*- lexical-binding: t -*-
 
-;; Copyright (C) 2015, 2016 Kalle Kankare
+;; Copyright (C) 2015, 2016, 2020 Kalle Kankare
 
 ;; Author: Kalle Kankare <kalle.kankare@iki.fi>
 ;; Maintainer: Kalle Kankare <kalle.kankare@iki.fi>
@@ -124,7 +124,7 @@
 
 (require 'helm)
 (require 'helm-utils)
-(require 'helm-grep)
+(require 'helm-multi-match)
 (require 'thingatpt)
 (require 'compile)
 
@@ -206,7 +206,12 @@ The configuration can have the following items:
  - The argument for the grep command that makes grepping ignore
    character case.  Traditionally this is `--ignore-case' for a
    number of different greps.  This needs to be defined or the
-   `helm-grepint-cycle-character-case' function has no effect."
+   `helm-grepint-cycle-character-case' function has no effect.
+
+:modify-pattern-function
+ - This modifies the `helm-pattern' before giving it to the grep.
+   If this is nil, the default the `helm-grepint-pattern-modify'
+   function is used."
 
   (declare (indent defun))
   `(helm-grepint-grep-config ',name ',configuration))
@@ -358,23 +363,29 @@ CANDIDATE is ignored."
     (switch-to-buffer newbuf)
     (grep-mode)))
 
+(defun helm-grepint-pattern-modify (str)
+  "Splits the string at whitespace and replaces them with .*.
+
+Supports backslash escaping for literal spaces. See
+`helm-mm-split-pattern' for more details."
+  (string-join (helm-mm-split-pattern str t) ".*"))
+
 (defun helm-grepint-grep-process ()
   "This is the candidates-process for `helm-grepint-helm-source'."
-  (let ((cfg (helm-grepint-grep-config helm-grepint--selected-grep)))
+  (let* ((cfg (helm-grepint-grep-config helm-grepint--selected-grep))
+	 (modify (or (plist-get (cdr cfg) :modify-pattern-function) #'helm-grepint-pattern-modify)))
     (apply #'helm-grepint-run-command
-	   :extra-arguments (replace-regexp-in-string "  *" ".*" helm-pattern)
+	   :extra-arguments (funcall modify helm-pattern)
 	   (cdr cfg))))
 
 (defun helm-grepint-grep-filter-one-by-one (candidate)
-  "Propertize each CANDIDATE provided by `helm-grepint-helm-source'.
-
-Uses `helm-grep-highlight-match' from helm-grep to provide line highlight."
+  "Propertize each CANDIDATE provided by `helm-grepint-helm-source'."
   (let ((items (helm-grepint-grep-parse-line candidate)))
     (if items
 	(format "%s:%s:%s"
 		(propertize (nth 0 items) 'face compilation-info-face)
 		(propertize (nth 1 items) 'face compilation-line-face)
-		(helm-grep-highlight-match (nth 2 items) t))
+		(nth 2 items))
       "")))
 
 (defun helm-grepint--header-name (name)
