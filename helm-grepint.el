@@ -5,10 +5,10 @@
 ;; Author: Kalle Kankare <kalle.kankare@iki.fi>
 ;; Maintainer: Kalle Kankare <kalle.kankare@iki.fi>
 ;; Created: 19 Sep 2015
-;; Keywords: grep, grepping, searching, helm
+;; Keywords: grep, grepping, searching, helm, tools, convenience
 ;; Version: 1.3.1
 ;; URL: https://github.com/kopoli/helm-grepint
-;; Package-Requires: ((helm "1.0") (emacs "24"))
+;; Package-Requires: ((helm "1.0") (emacs "24.4"))
 
 ;; This file is not part of GNU Emacs.
 
@@ -254,7 +254,7 @@ or property was not found."
   "The current command that is being run.  It is available for actions.")
 
 (defun helm-grepint--prepare-args(plist)
-  "Prepare argument list for running the grep."
+  "Prepare argument PLIST for running the grep."
   (let ((igncasearg (plist-get plist :ignore-case-arg))
 	(args (split-string (plist-get plist :arguments)))
 	(searchstr (plist-get plist :extra-arguments)))
@@ -374,7 +374,7 @@ CANDIDATE is ignored."
     (grep-mode)))
 
 (defun helm-grepint-pattern-modify (str)
-  "Splits the string at whitespace and replaces them with .*.
+  "Split the STR at whitespace and replace them with .*.
 
 Supports backslash escaping for literal spaces. See
 `helm-mm-split-pattern' for more details."
