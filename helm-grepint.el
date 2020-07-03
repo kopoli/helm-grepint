@@ -61,7 +61,7 @@
 ;; ### Key bindings within helm
 
 ;; - `RET'/`F1' selects an item and closes the helm session.
-;; - `F2' displays the grep results in a `grep-mode' buffer.
+;; - `F2' runs the grep command in a `grep-mode' buffer.
 ;; - `Right-arrow' selects the item, but does not close the helm session.  This
 ;;   is similar as `helm-occur'.  Default helmkeybindings for this feature are
 ;;   also available (`C-j' and `C-z').
@@ -137,6 +137,7 @@
 (require 'helm-multi-match)
 (require 'thingatpt)
 (require 'compile)
+(require 'grep)
 
 (defcustom helm-grepint-grep-list ()
   "List of grep commands.
@@ -290,7 +291,9 @@ used as is."
 	proc)
     (when cmd
       (setq helm-grepint-current-command
-	    (mapconcat #'identity (append (list cmd) args) " "))
+	    (mapconcat (lambda (s)
+			 (concat "\"" (replace-regexp-in-string "\"" "\\\"" s) "\""))
+		       (append (list cmd) args) " "))
       (setq proc (apply 'start-process "helm-grepint" nil
 			(append (list cmd) args)))
       (set-process-sentinel proc
@@ -353,25 +356,13 @@ Returns a list of (file line contents) or nil if the line could not be parsed."
   (run-hooks 'helm-grepint-grep-jump-post-hook))
 
 (defun helm-grepint-grep-action-mode (candidate)
-  "Open a copy of the helm buffer in `grep-mode'.
+  "Run `grep-mode' with the current pattern.
 
 CANDIDATE is ignored."
-  (let ((newbuf (format "* grep-mode %s *" (buffer-name)))
-	(oldparams
-	 (with-helm-buffer
-	   (list (current-buffer)
-		 (save-excursion (goto-char (point-min)) (forward-line 1) (point))
-		 (point-max)))))
-    (with-current-buffer (get-buffer-create newbuf)
-      (let ((inhibit-read-only t))
-	(erase-buffer)
-	(apply #'insert-buffer-substring oldparams)
-	(goto-char (point-min))
-	(insert (format (concat "-*- mode: grep; default-directory: \"%s\" -*-\n"
-				"\n\n%s\n")
-			(helm-default-directory) helm-grepint-current-command))))
-    (switch-to-buffer newbuf)
-    (grep-mode)))
+  (let ((bufname (format "* helm-grepint %s: %s*"
+			 (abbreviate-file-name (helm-default-directory))
+			 helm-pattern)))
+    (compilation-start helm-grepint-current-command 'grep-mode (lambda (x) bufname))))
 
 (defun helm-grepint-pattern-modify (str)
   "Split the STR at whitespace and replace them with .*.
@@ -426,7 +417,7 @@ Additionally displays the used character case."
       :requires-pattern helm-grepint-min-pattern-length
       :candidates-process #'helm-grepint-grep-process
       :action '(("Jump to" . helm-grepint-grep-action-jump)
-	       ("Open in grep-mode" . helm-grepint-grep-action-mode))
+	       ("Run in grep-mode" . helm-grepint-grep-action-mode))
       :candidate-number-limit helm-grepint-candidate-number-limit
       :header-name #'helm-grepint--header-name
       :filter-one-by-one #'helm-grepint-grep-filter-one-by-one))
