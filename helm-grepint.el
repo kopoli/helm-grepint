@@ -6,7 +6,7 @@
 ;; Maintainer: Kalle Kankare <kalle.kankare@iki.fi>
 ;; Created: 19 Sep 2015
 ;; Keywords: grep, grepping, searching, helm, tools, convenience
-;; Version: 1.3.2
+;; Version: 1.4.0
 ;; URL: https://github.com/kopoli/helm-grepint
 ;; Package-Requires: ((helm "2.9.7") (emacs "24.4"))
 
@@ -67,6 +67,11 @@
 ;; details on what is required for a new grep to be defined.
 
 ;; ### Notable changes
+
+;; Version 1.4.0
+
+;; - The F2 action runs the command and displays the results in `grep-mode'.
+;;   Previously the grep-mode was only faked.
 
 ;; Version 1.3.0
 

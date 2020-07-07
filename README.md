@@ -1,9 +1,11 @@
+<a href="https://github.com/kopoli/helm-grepint"><img src="https://www.gnu.org/software/emacs/images/emacs.png" alt="Emacs Logo" width="80" height="80" align="right"></a>
 ## helm-grepint.el
 *Generic helm interface to grep*
 
 ---
 [![License GPLv3](https://img.shields.io/badge/license-GPL_v3-green.svg)](http://www.gnu.org/licenses/gpl-3.0.html)
-[![MELPA](https://melpa.org/packages/helm-grepint-badge.svg)](https://melpa.org/#/helm-grepint)
+[![MELPA](http://melpa.org/packages/helm-grepint-badge.svg)](http://melpa.org/#/helm-grepint)
+[![MELPA Stable](http://stable.melpa.org/packages/helm-grepint-badge.svg)](http://stable.melpa.org/#/helm-grepint)
 
 ### Description
 
@@ -12,8 +14,6 @@ This package solves the following problems for me:
 - Selects the grep based on context: Inside a git-repository, runs
   `git-grep`, otherwise runs `ag`.
 - Uses helm to select candidates and jumps to the given line with RET.
-
-And the following additional problems (as of version 1.2.0):
 - A second interactive function `helm-grepint-grep-root`.  This runs the
   grepping inside a root directory.  By default this has been defined for
   the git-grep where it greps from the git root directory.
@@ -31,15 +31,10 @@ The following enables the aforementioned:
         (global-set-key (kbd "C-c g") #'helm-grepint-grep)
         (global-set-key (kbd "C-c G") #'helm-grepint-grep-root)
 
-The original configuration (i.e. without the above additional features) is
-available with the following:
-
-        (helm-grepint-set-default-config)
-
 ### Key bindings within helm
 
 - `RET`/`F1` selects an item and closes the helm session.
-- `F2` displays the grep results in a `grep-mode` buffer.
+- `F2` runs the grep command in a `grep-mode` buffer.
 - `Right-arrow` selects the item, but does not close the helm session.  This
   is similar as `helm-occur`.  Default helmkeybindings for this feature are
   also available (`C-j` and `C-z`).
@@ -51,7 +46,12 @@ Look into the function `helm-grepint-set-default-config` to see how the default
 cases are configured.  Also look into `helm-grepint-add-grep-config` for more
 details on what is required for a new grep to be defined.
 
-### Changes
+### Notable changes
+
+Version 1.4.0
+
+- The F2 action runs the command and displays the results in `grep-mode`.
+  Previously the grep-mode was only faked.
 
 Version 1.3.0
 
@@ -195,13 +195,13 @@ Jump to line in a file described by a grep -line CANDIDATE.
 
 #### `(helm-grepint-grep-action-mode CANDIDATE)`
 
-Open a copy of the helm buffer in ‘grep-mode’.
+Run ‘grep-mode’ with the current pattern.
 
 CANDIDATE is ignored.
 
 #### `(helm-grepint-pattern-modify STR)`
 
-Splits the string at whitespace and replaces them with .*.
+Split the STR at whitespace and replace them with .*.
 
 Supports backslash escaping for literal spaces. See
 ‘helm-mm-split-pattern’ for more details.
