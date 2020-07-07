@@ -34,8 +34,6 @@
 ;; - Selects the grep based on context: Inside a git-repository, runs
 ;;   `git-grep', otherwise runs `ag'.
 ;; - Uses helm to select candidates and jumps to the given line with RET.
-
-;; And the following additional problems (as of version 1.2.0):
 ;; - A second interactive function `helm-grepint-grep-root'.  This runs the
 ;;   grepping inside a root directory.  By default this has been defined for
 ;;   the git-grep where it greps from the git root directory.
@@ -53,11 +51,6 @@
 ;;         (global-set-key (kbd "C-c g") #'helm-grepint-grep)
 ;;         (global-set-key (kbd "C-c G") #'helm-grepint-grep-root)
 
-;; The original configuration (i.e. without the above additional features) is
-;; available with the following:
-
-;;         (helm-grepint-set-default-config)
-
 ;; ### Key bindings within helm
 
 ;; - `RET'/`F1' selects an item and closes the helm session.
@@ -73,7 +66,7 @@
 ;; cases are configured.  Also look into `helm-grepint-add-grep-config' for more
 ;; details on what is required for a new grep to be defined.
 
-;; ### Changes
+;; ### Notable changes
 
 ;; Version 1.3.0
 
