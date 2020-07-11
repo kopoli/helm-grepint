@@ -424,8 +424,8 @@ Additionally displays the used character case."
 (defun helm-grepint--grep (in-root &optional arg)
   "Run grep either in current directory or if IN-ROOT, in a root directory.
 
-ARG is the prefix argument and given \\[universal-argument] this
-triggers manual selection of grep configuration,
+ARG is the prefix argument, and given \\[universal-argument] this
+triggers manual selection of grep configuration.
 
 The grep function is determined by the contents of
 `helm-grepint-grep-configs' and the order of `helm-grepint-grep-list'.  The
