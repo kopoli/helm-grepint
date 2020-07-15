@@ -274,7 +274,7 @@ or property was not found."
 		  (if (equal ccase 'case-insensitive)
 		      (append args (list igncasearg))
 		    args))))))
-    (append args (list searchstr))))
+    (append args '("--") (list searchstr))))
 
 (defun helm-grepint-run-command (&rest plist)
   "Run a grep command from PLIST.
