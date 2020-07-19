@@ -349,9 +349,10 @@ Returns a list of (file line contents) or nil if the line could not be parsed."
   "Jump to line in a file described by a grep -line CANDIDATE."
   (run-hooks 'helm-grepint-grep-jump-pre-hook)
   (let ((items (helm-grepint-grep-parse-line candidate)))
-    (with-helm-default-directory (helm-default-directory)
+    (when items
+      (with-helm-default-directory (helm-default-directory)
 	(find-file (nth 0 items))
-      (helm-goto-line (string-to-number (nth 1 items)))))
+	(helm-goto-line (string-to-number (nth 1 items))))))
   (run-hooks 'helm-grepint-grep-jump-post-hook))
 
 (defun helm-grepint-grep-action-mode (candidate)
