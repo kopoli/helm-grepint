@@ -202,6 +202,14 @@ The configuration can have the following items:
 :arguments
  - Arguments provided for the command when it is run.  This
    and :command is provided for the `helm-grepint-run-command' function.
+ - The argument string can contain the following strings that are
+   replaced with given strings:
+
+   \":ignore-case-argument\" -> The value of :ignore-case-argument.
+   \":search-pattern\" -> The pattern from helm.
+
+   If the above are not given, they are concatenated in the above
+   order to the command line.
 
 :enable-function
  - A function that returns non-nil if this grep can be used.  If
@@ -253,11 +261,27 @@ or property was not found."
 (defvar helm-grepint-current-command nil
   "The current command that is being run.  It is available for actions.")
 
-(defun helm-grepint--prepare-args(plist)
+(defun helm-grepint--replace-or-append (sequence searchstr replace)
+  "Replace items equal to SEARCHSTR with REPLACE in SEQUENCE.
+
+If the SEARCHSTR is not found, REPLACE is appended to the SEQUENCE."
+  (let ((found nil))
+    (setq sequence
+	  (mapcar #'(lambda (x)
+		      (if (string= x searchstr)
+			  (progn (setq found t) replace)
+			x))
+		  sequence))
+    (if found
+	sequence
+      (append sequence (list replace)))))
+
+(defun helm-grepint--prepare-args (plist)
   "Prepare argument PLIST for running the grep."
   (let ((igncasearg (plist-get plist :ignore-case-arg))
 	(args (split-string (plist-get plist :arguments)))
-	(searchstr (plist-get plist :extra-arguments)))
+	(searchstr (plist-get plist :search-pattern))
+	(extra (plist-get plist :extra-arguments)))
 
     (when igncasearg
       (with-helm-buffer
@@ -268,13 +292,13 @@ or property was not found."
 			(string-match-p "[[:upper:]]" searchstr))
 		      'case-sensitive
 		    'case-insensitive)))
-	  (setq args
-		(progn
-		  (delete igncasearg args)
-		  (if (equal ccase 'case-insensitive)
-		      (append args (list igncasearg))
-		    args))))))
-    (append args (list searchstr))))
+	  (setq igncasearg
+		(if (equal ccase 'case-insensitive)
+		    igncasearg
+		  nil)))))
+    (setq args (helm-grepint--replace-or-append args ":ignore-case-arg" igncasearg))
+    (setq args (helm-grepint--replace-or-append args ":search-pattern" searchstr))
+    (delete nil (append args (list extra)))))
 
 (defun helm-grepint-run-command (&rest plist)
   "Run a grep command from PLIST.
@@ -376,7 +400,7 @@ Supports backslash escaping for literal spaces. See
   (let* ((cfg (helm-grepint-grep-config helm-grepint--selected-grep))
 	 (modify (or (plist-get (cdr cfg) :modify-pattern-function) #'helm-grepint-pattern-modify)))
     (apply #'helm-grepint-run-command
-	   :extra-arguments (funcall modify helm-pattern)
+	   :search-pattern (funcall modify helm-pattern)
 	   (cdr cfg))))
 
 (defun helm-grepint-grep-filter-one-by-one (candidate)
@@ -479,14 +503,14 @@ See the usage for ARG in `helm-grepint--grep'."
 
   (helm-grepint-add-grep-config git-grep
     :command "git"
-    :arguments "--no-pager grep --line-number --no-color"
+    :arguments "--no-pager grep --line-number --no-color :ignore-case-arg -- :search-pattern"
     :ignore-case-arg "--ignore-case"
     :enable-function helm-grepint-git-grep-locate-root
     :root-directory-function helm-grepint-git-grep-locate-root)
 
   (helm-grepint-add-grep-config ag
     :command "ag"
-    :arguments "--nocolor --search-zip --nogroup"
+    :arguments "--nocolor --search-zip --nogroup :ignore-case-arg -- :search-pattern"
     :ignore-case-arg "--ignore-case"
     :root-directory-function helm-grepint-grep-ask-root)
 
