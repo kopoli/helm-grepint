@@ -6,7 +6,7 @@
 ;; Maintainer: Kalle Kankare <kalle.kankare@iki.fi>
 ;; Created: 19 Sep 2015
 ;; Keywords: grep, grepping, searching, helm, tools, convenience
-;; Version: 1.4.0
+;; Version: 1.5.0
 ;; URL: https://github.com/kopoli/helm-grepint
 ;; Package-Requires: ((helm "2.9.7") (emacs "24.4"))
 
@@ -67,6 +67,11 @@
 ;; details on what is required for a new grep to be defined.
 
 ;; ### Notable changes
+
+;; Version 1.5.0
+
+;; - Use templates in the :arguments of `helm-grepint-add-grep-config'. Use
+;;   the templated approach for both `git-grep' and `ag' configurations.
 
 ;; Version 1.4.0
 

@@ -48,6 +48,11 @@ details on what is required for a new grep to be defined.
 
 ### Notable changes
 
+Version 1.5.0
+
+- Use templates in the :arguments of `helm-grepint-add-grep-config`. Use
+  the templated approach for both `git-grep` and `ag` configurations.
+
 Version 1.4.0
 
 - The F2 action runs the command and displays the results in `grep-mode`.
@@ -123,6 +128,14 @@ The configuration can have the following items:
 :arguments
  - Arguments provided for the command when it is run.  This
    and :command is provided for the ‘helm-grepint-run-command’ function.
+ - The argument string can contain the following strings that are
+   replaced with given strings:
+
+   ":ignore-case-argument" -> The value of :ignore-case-argument.
+   ":search-pattern" -> The pattern from helm.
+
+   If the above are not given, they are concatenated in the above
+   order to the command line.
 
 :enable-function
  - A function that returns non-nil if this grep can be used.  If
