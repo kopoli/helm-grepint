@@ -320,7 +320,7 @@ used as is."
     (when cmd
       (setq helm-grepint-current-command
 	    (mapconcat (lambda (s)
-			 (concat "\"" (replace-regexp-in-string "\"" "\\\"" s) "\""))
+			 (concat "\"" (replace-regexp-in-string "\"" "\\\"" s nil 'literal) "\""))
 		       (append (list cmd) args) " "))
       (setq proc (apply 'start-process "helm-grepint" nil
 			(append (list cmd) args)))
