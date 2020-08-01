@@ -157,6 +157,11 @@ These are the names in `helm-grepint-grep-configs'."
   "The function that supplies the pre-input for grep."
   :group 'helm-grepint)
 
+(defcustom helm-grepint-regexp-quote-pre-input nil
+  "Quote regular expression special characters in the pre-input string."
+  :group 'helm-grepint
+  :type 'boolean)
+
 (defcustom helm-grepint-candidate-number-limit 500
   "Number of candidates to display."
   :group 'helm-grepint)
@@ -471,7 +476,10 @@ property of an element of `helm-grepint-grep-configs'."
     (helm :sources '(helm-grepint-helm-source)
 	  :buffer (format "Grepint%s: %s" (if in-root "-root" "") name)
 	  :keymap helm-grepint-helm-map
-	  :input (funcall helm-grepint-pre-input-function)
+	  :input (let ((input (funcall helm-grepint-pre-input-function)))
+		   (if helm-grepint-regexp-quote-pre-input
+		       (regexp-quote input)
+		     input))
 	  :helm-grepint--selected-grep name
 	  :helm-grepint--character-case helm-grepint-initial-case)))
 
