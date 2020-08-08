@@ -48,6 +48,12 @@ details on what is required for a new grep to be defined.
 
 ### Notable changes
 
+Version 1.6.0
+
+- Add `helm-grepint-regexp-quote-pre-input` option enable quoting of
+  regular expression characters in the pre-input string. It is disabled by
+  default.
+
 Version 1.5.0
 
 - Use templates in the :arguments of `helm-grepint-add-grep-config`. Use

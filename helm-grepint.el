@@ -6,7 +6,7 @@
 ;; Maintainer: Kalle Kankare <kalle.kankare@iki.fi>
 ;; Created: 19 Sep 2015
 ;; Keywords: grep, grepping, searching, helm, tools, convenience
-;; Version: 1.5.1
+;; Version: 1.6.0
 ;; URL: https://github.com/kopoli/helm-grepint
 ;; Package-Requires: ((helm "2.9.7") (emacs "24.4"))
 
@@ -67,6 +67,12 @@
 ;; details on what is required for a new grep to be defined.
 
 ;; ### Notable changes
+
+;; Version 1.6.0
+
+;; - Add `helm-grepint-regexp-quote-pre-input' option enable quoting of
+;;   regular expression characters in the pre-input string. It is disabled by
+;;   default.
 
 ;; Version 1.5.0
 
