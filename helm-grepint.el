@@ -454,6 +454,7 @@ Additionally displays the used character case."
 (defvar helm-grepint-helm-source
   (helm-build-async-source "Generic grep interface"
       :volatile t
+      :keymap helm-grepint-helm-map
       :requires-pattern helm-grepint-min-pattern-length
       :candidates-process #'helm-grepint-grep-process
       :action '(("Jump to" . helm-grepint-grep-action-jump)
@@ -481,7 +482,6 @@ property of an element of `helm-grepint-grep-configs'."
 			 #'helm-grepint-grep-default-root))))
     (helm :sources '(helm-grepint-helm-source)
 	  :buffer (format "Grepint%s: %s" (if in-root "-root" "") name)
-	  :keymap helm-grepint-helm-map
 	  :input (let ((input (funcall helm-grepint-pre-input-function)))
 		   (if helm-grepint-regexp-quote-pre-input
 		       (regexp-quote input)
